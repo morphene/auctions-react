@@ -1,0 +1,55 @@
+body, html {
+  background-color: #282c34;
+}
+
+.App {
+  text-align: center;
+  background-color: #282c34;
+}
+
+.App-logo, .card-img-top {
+  animation: App-logo-spin infinite 20s linear;
+  pointer-events: none;
+  width: 8em !important;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+.App-header {
+  background-color: #282c34;
+  font-size: calc(10px + 2vmin);
+  padding: 2rem 2rem;
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.auction-button {
+  margin: 0 10px;
+}
+
+.card-style {
+  max-width: 16rem !important;
+  min-width: 16rem !important;
+  width: 16rem !important;
+  color: #000 !important;
+  font-size: .7em !important;
+  margin-bottom: 15px !important;
+}
+
+.navbar {
+  width: 100% !important;
+  padding-left: -3rem !important;
+  padding-right: -3rem !important;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
