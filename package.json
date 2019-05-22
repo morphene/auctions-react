@@ -2,6 +2,7 @@
   "name": "auctionreact",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/auctions",
   "dependencies": {
     "@boone-development/morphene-js": "^0.1.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.18",

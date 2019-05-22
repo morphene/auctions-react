@@ -38,7 +38,7 @@ Amplify.configure(awsmobile);
 ReactDOM.render(
     <Router>
         <Switch>
-            <Route path="/" exact component={Home} />
+            <Route path="/auctions" exact component={Home} />
         </Switch>
     </Router>,
     document.getElementById('root')
