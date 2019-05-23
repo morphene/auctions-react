@@ -110,11 +110,12 @@ class NavBar extends React.Component {
     Auth.currentAuthenticatedUser().then(user => {
       Auth.userAttributes(user).then((attrs) => {
         const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
-        if(activeKey) {
+        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
+        if(activeKey && chainName) {
             morpheneJS.broadcast.createAuctionAsync(
               activeKey.Value,
-              user.username,
-              `${user.username}-${moment().unix()}`,
+              chainName,
+              `${chainName}-${moment().unix()}`,
               startTime,
               endTime,
               `${fee}.000 MORPH`
