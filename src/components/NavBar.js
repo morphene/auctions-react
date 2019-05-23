@@ -114,8 +114,8 @@ class NavBar extends React.Component {
         if(activeKey && chainName) {
             morpheneJS.broadcast.createAuctionAsync(
               activeKey.Value,
-              chainName,
-              `${chainName}-${moment().unix()}`,
+              chainName.Value,
+              `${chainName.Value}-${moment().unix()}`,
               startTime,
               endTime,
               `${fee}.000 MORPH`
