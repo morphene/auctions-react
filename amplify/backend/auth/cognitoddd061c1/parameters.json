@@ -1,12 +1,12 @@
 {
-    "identityPoolName": "cognitod5ffabbf_identitypool_d5ffabbf",
+    "identityPoolName": "cognitoddd061c1_identitypool_ddd061c1",
     "allowUnauthenticatedIdentities": false,
-    "lambdaLogPolicy": "cognitod5ffabbf_lambda_log_policy",
-    "openIdLambdaRoleName": "cognitod5ffabbf_openid_lambda_role",
-    "openIdRolePolicy": "cognitod5ffabbf_openid_pass_role_policy",
-    "openIdLambdaIAMPolicy": "cognitod5ffabbf_openid_lambda_iam_policy",
-    "openIdLogPolicy": "cognitod5ffabbf_openid_lambda_log_policy",
-    "userPoolName": "cognitod5ffabbf_userpool_d5ffabbf",
+    "lambdaLogPolicy": "cognitoddd061c1_lambda_log_policy",
+    "openIdLambdaRoleName": "cognitoddd061c1_openid_lambda_role",
+    "openIdRolePolicy": "cognitoddd061c1_openid_pass_role_policy",
+    "openIdLambdaIAMPolicy": "cognitoddd061c1_openid_lambda_iam_policy",
+    "openIdLogPolicy": "cognitoddd061c1_openid_lambda_log_policy",
+    "userPoolName": "cognitoddd061c1_userpool_ddd061c1",
     "autoVerifiedAttributes": [
         "email"
     ],
@@ -14,9 +14,9 @@
     "mfaTypes": [
         "SMS Text Message"
     ],
-    "roleName": "cognitod5ffabbf_sns-role",
-    "roleExternalId": "cognitod5ffabbf_role_external_id",
-    "policyName": "cognitod5ffabbf-sns-policy",
+    "roleName": "cognitoddd061c1_sns-role",
+    "roleExternalId": "cognitoddd061c1_role_external_id",
+    "policyName": "cognitoddd061c1-sns-policy",
     "smsAuthenticationMessage": "Your authentication code is {####}",
     "smsVerificationMessage": "Your verification code is {####}",
     "emailVerificationSubject": "Your verification code",
@@ -32,7 +32,7 @@
     "requiredAttributes": [
         "email"
     ],
-    "userpoolClientName": "cognitod5ffabbf_app_client",
+    "userpoolClientName": "cognitoddd061c1_app_client",
     "userpoolClientGenerateSecret": true,
     "userpoolClientRefreshTokenValidity": 30,
     "userpoolClientWriteAttributes": [
@@ -41,15 +41,15 @@
     "userpoolClientReadAttributes": [
         "email"
     ],
-    "mfaLambdaRole": "cognitod5ffabbf_totp_lambda_role",
-    "mfaLambdaLogPolicy": "cognitod5ffabbf_totp_lambda_log_policy",
-    "mfaPassRolePolicy": "cognitod5ffabbf_totp_pass_role_policy",
-    "mfaLambdaIAMPolicy": "cognitod5ffabbf_totp_lambda_iam_policy",
-    "userpoolClientLambdaRole": "cognitod5ffabbf_userpoolclient_lambda_role",
-    "userpoolClientLogPolicy": "cognitod5ffabbf_userpoolclient_lambda_log_policy",
-    "userpoolClientLambdaPolicy": "cognitod5ffabbf_userpoolclient_lambda_iam_policy",
+    "mfaLambdaRole": "cognitoddd061c1_totp_lambda_role",
+    "mfaLambdaLogPolicy": "cognitoddd061c1_totp_lambda_log_policy",
+    "mfaPassRolePolicy": "cognitoddd061c1_totp_pass_role_policy",
+    "mfaLambdaIAMPolicy": "cognitoddd061c1_totp_lambda_iam_policy",
+    "userpoolClientLambdaRole": "cognitoddd061c1_userpoolclient_lambda_role",
+    "userpoolClientLogPolicy": "cognitoddd061c1_userpoolclient_lambda_log_policy",
+    "userpoolClientLambdaPolicy": "cognitoddd061c1_userpoolclient_lambda_iam_policy",
     "userpoolClientSetAttributes": false,
-    "resourceName": "cognitod5ffabbf",
+    "resourceName": "cognitoddd061c1",
     "authSelections": "identityPoolAndUserPool",
     "authRoleName": {
         "Ref": "AuthRoleName"
@@ -74,10 +74,10 @@
     "usernameAttributes": [
         "email"
     ],
-    "hostedUIDomainName": "morphene-auctions-dev",
+    "hostedUIDomainName": "morphene-auctions-prod",
     "authProvidersUserPool": [
         "Google"
     ],
     "hostedUIProviderMeta": "[{\"ProviderName\":\"Google\",\"authorize_scopes\":\"openid email profile\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"sub\"}}]",
-    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:3000/auctions/\"],\"LogoutURLs\":[\"http://localhost:3000/auctions/\"]}"
+    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://morphene.io/auctions/\"],\"LogoutURLs\":[\"https://morphene.io/auctions/\"]}"
 }

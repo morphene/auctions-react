@@ -1,37 +1,18 @@
 {
-    "dev": {
-        "awscloudformation": {
-            "AuthRoleName": "morphene-auctions-dev-20190522220709-authRole",
-            "UnauthRoleArn": "arn:aws:iam::533763485640:role/morphene-auctions-dev-20190522220709-unauthRole",
-            "AuthRoleArn": "arn:aws:iam::533763485640:role/morphene-auctions-dev-20190522220709-authRole",
-            "Region": "us-east-1",
-            "DeploymentBucketName": "morphene-auctions-dev-20190522220709-deployment",
-            "UnauthRoleName": "morphene-auctions-dev-20190522220709-unauthRole",
-            "StackName": "morphene-auctions-dev-20190522220709",
-            "StackId": "arn:aws:cloudformation:us-east-1:533763485640:stack/morphene-auctions-dev-20190522220709/cfc3ceb0-7d07-11e9-b837-12dffdf25cac"
-        },
-        "categories": {
-            "auth": {
-                "cognitod5ffabbf": {
-                    "hostedUIProviderCreds": "[{\"ProviderName\":\"Google\",\"client_id\":\"1012877842627-amrtpr23degpsjvh53mgur7v0drc2no8.apps.googleusercontent.com\",\"client_secret\":\"Z0V4jcm04lFHF16wLktUKSXc\"}]"
-                }
-            }
-        }
-    },
     "prod": {
         "awscloudformation": {
-            "AuthRoleName": "morphene-auctions-prod-20190522221022-authRole",
-            "UnauthRoleArn": "arn:aws:iam::533763485640:role/morphene-auctions-prod-20190522221022-unauthRole",
-            "AuthRoleArn": "arn:aws:iam::533763485640:role/morphene-auctions-prod-20190522221022-authRole",
+            "AuthRoleName": "morphene-auctions-prod-20190523074244-authRole",
+            "UnauthRoleArn": "arn:aws:iam::533763485640:role/morphene-auctions-prod-20190523074244-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::533763485640:role/morphene-auctions-prod-20190523074244-authRole",
             "Region": "us-east-1",
-            "DeploymentBucketName": "morphene-auctions-prod-20190522221022-deployment",
-            "UnauthRoleName": "morphene-auctions-prod-20190522221022-unauthRole",
-            "StackName": "morphene-auctions-prod-20190522221022",
-            "StackId": "arn:aws:cloudformation:us-east-1:533763485640:stack/morphene-auctions-prod-20190522221022/42ac76c0-7d08-11e9-b652-126f3d94de7e"
+            "DeploymentBucketName": "morphene-auctions-prod-20190523074244-deployment",
+            "UnauthRoleName": "morphene-auctions-prod-20190523074244-unauthRole",
+            "StackName": "morphene-auctions-prod-20190523074244",
+            "StackId": "arn:aws:cloudformation:us-east-1:533763485640:stack/morphene-auctions-prod-20190523074244/5a646f90-7d2e-11e9-ae3b-0e26c4fc90f2"
         },
         "categories": {
             "auth": {
-                "cognitod5ffabbf": {
+                "cognitoddd061c1": {
                     "hostedUIProviderCreds": "[{\"ProviderName\":\"Google\",\"client_id\":\"1012877842627-amrtpr23degpsjvh53mgur7v0drc2no8.apps.googleusercontent.com\",\"client_secret\":\"Z0V4jcm04lFHF16wLktUKSXc\"}]"
                 }
             }
