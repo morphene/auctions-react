@@ -35,6 +35,7 @@ class NavBar extends React.Component {
     this.state = {
       user: false,
       activeKey: false,
+      chainName: false,
       showUpdateKey: false,
       showCreateAuction: false,
       authState: 'loading',
@@ -67,11 +68,13 @@ class NavBar extends React.Component {
   checkUserAuth() {
     Auth.currentAuthenticatedUser().then(user => {
       Auth.userAttributes(user).then((attrs) => {
-        attrs = attrs.filter((attr) => {return attr.Name === "custom:active_key"})
-        if(attrs[0]) {
-          this.setState({authState: 'signedIn', user: user, activeKey: attrs[0].Value});
+        const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
+        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
+
+        if(activeKey && chainName) {
+          this.setState({authState: 'signedIn', user, chainName: chainName.Value, activeKey: activeKey.Value});
         } else {
-          this.setState({authState: 'signedIn', user: user, activeKey: false});
+          this.setState({authState: 'signedIn', user, chainName, activeKey});
         }
       })
     }).catch(e => {
@@ -95,7 +98,7 @@ class NavBar extends React.Component {
   updateKey() {
     const activeKey = document.getElementById("activeKey").value
     Auth.currentAuthenticatedUser().then(user => {
-      Auth.updateUserAttributes(user, {'custom:active_key': activeKey})
+      Auth.updateUserAttributes(user, {'custom:activeKey': activeKey})
     })
     this.setState({showUpdateKey: false})
   }
@@ -106,10 +109,10 @@ class NavBar extends React.Component {
     const endTime = document.getElementById("endTime").value.replace(" ", "T");
     Auth.currentAuthenticatedUser().then(user => {
       Auth.userAttributes(user).then((attrs) => {
-        attrs = attrs.filter((attr) => {return attr.Name === "custom:active_key"})
-        if(attrs[0]) {
+        const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
+        if(activeKey) {
             morpheneJS.broadcast.createAuctionAsync(
-              attrs[0].Value,
+              activeKey.Value,
               user.username,
               `${user.username}-${moment().unix()}`,
               startTime,
@@ -127,38 +130,43 @@ class NavBar extends React.Component {
 
   validateUserKey() {
     Auth.currentAuthenticatedUser().then(user => {
-        morpheneJS.api.getAccountsAsync([user.username])
-            .then((result) => {
-                if(result.length > 0) {
-                    const newKey = document.getElementById("activeKey").value;
-                    try{
-                      const pubKey = morpheneJS.auth.wifToPublic(newKey);
-                      morpheneJS.api.getAccountsAsync([this.state.user.username])
-                      .then((result) => {
-                        var possibleKeys = []
-                        const user = result[0]
-                        user.owner.key_auths.forEach((auth) => {possibleKeys.push(auth[0])})
-                        user.active.key_auths.forEach((auth) => {possibleKeys.push(auth[0])})
-                        if(possibleKeys.includes(pubKey)){
-                            document.getElementById("invalidKey").style.display = "none"
-                            document.getElementById("validKey").style.display = "block"
-                        } else {
-                            document.getElementById("validKey").style.display = "none"
-                            document.getElementById("invalidKey").style.display = "block"
-                        }
-                      })
-                      .catch((error) => {console.log(error)})
-                    } catch {
-                        document.getElementById("validKey").style.display = "none"
-                        document.getElementById("invalidKey").style.display = "block"
-                    }
-                } else {
-                    document.getElementById("activeKey").disabled = true;
-                    document.getElementById("user-submit").disabled = true;
-                    document.getElementById("activeKey").placeholder = "User not created. Please check back later";
-                }
+      Auth.userAttributes(user).then((attrs) => {
+        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
+        if( chainName ) {
+          morpheneJS.api.getAccountsAsync([chainName.Value])
+              .then((result) => {
+                  if(result.length > 0) {
+                      const newKey = document.getElementById("activeKey").value;
+                      try{
+                        const pubKey = morpheneJS.auth.wifToPublic(newKey);
+                        // morpheneJS.api.getAccountsAsync([chainName.Value])
+                        // .then((result) => {
+                          var possibleKeys = []
+                          const user = result[0]
+                          user.owner.key_auths.forEach((auth) => {possibleKeys.push(auth[0])})
+                          user.active.key_auths.forEach((auth) => {possibleKeys.push(auth[0])})
+                          if(possibleKeys.includes(pubKey)){
+                              document.getElementById("invalidKey").style.display = "none"
+                              document.getElementById("validKey").style.display = "block"
+                          } else {
+                              document.getElementById("validKey").style.display = "none"
+                              document.getElementById("invalidKey").style.display = "block"
+                          }
+                        // })
+                        // .catch((error) => {console.log(error)})
+                      } catch {
+                          document.getElementById("validKey").style.display = "none"
+                          document.getElementById("invalidKey").style.display = "block"
+                      }
+                  } else {
+                      document.getElementById("activeKey").disabled = true;
+                      document.getElementById("user-submit").disabled = true;
+                      document.getElementById("activeKey").placeholder = "User not created. Please check back later";
+                  }
             })
             .catch((error) => console.log(error))
+          }
+      })
     })
   }
 
@@ -225,7 +233,7 @@ class NavBar extends React.Component {
             style={{textAlign: 'center', fontSize: '.9em'}}
             centered>
           <Modal.Header closeButton>
-            <h5>Update Key - {this.state.user ? this.state.user.username : ""}</h5><hr/>
+            <h5>Update Key - {this.state.chainName}</h5><hr/>
           </Modal.Header>
           <Modal.Body>
             <div className="form-group form-inline">
@@ -235,6 +243,7 @@ class NavBar extends React.Component {
                 name="activeKey"
                 onChange={this.validateUserKey}
                 placeholder={"enter active key and click save"}
+                defaultValue={this.state.activeKey}
                 style={{width: "75%", marginLeft: "10px"}}
                 className="form-control"
                 autoComplete="off" />

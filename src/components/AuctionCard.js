@@ -63,11 +63,12 @@ class AuctionCard extends React.Component {
   checkUserAuth() {
     Auth.currentAuthenticatedUser().then(user => {
       Auth.userAttributes(user).then((attrs) => {
-        attrs = attrs.filter((attr) => {return attr.Name === "custom:active_key"})
-        if(attrs[0]) {
-          this.setState({authState: 'signedIn', user: user, activeKey: attrs[0].Value});
+        const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
+        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
+        if(activeKey && chainName) {
+          this.setState({authState: 'signedIn', user, chainName: chainName.Value, activeKey: activeKey.Value});
         } else {
-          this.setState({authState: 'signedIn', user: user, activeKey: false});
+          this.setState({authState: 'signedIn', user, chainName, activeKey});
         }
       })
     }).catch(e => {
@@ -96,9 +97,10 @@ class AuctionCard extends React.Component {
   placeBid(permlink) {
     Auth.currentAuthenticatedUser().then(user => {
       Auth.userAttributes(user).then((attrs) => {
-        attrs = attrs.filter((attr) => {return attr.Name === "custom:active_key"})
-        if(attrs[0]) {
-          morpheneJS.broadcast.placeBidAsync(attrs[0].Value, user.username, permlink)
+        const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
+        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
+        if(chainName && activeKey) {
+          morpheneJS.broadcast.placeBidAsync(activeKey.Value, chainName.Value, permlink)
             .then((result) => {toast.success("Bid successfully placed")})
             .catch((error) => {toast.error(`${error}`)})
         } else {
