@@ -26,6 +26,12 @@ class FetchData extends React.Component {
     this.fetchData("get_auctions_by_status", {status, limit: 20})
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if(prevState.authState !== this.props.authState) {
+      this.setState({...this.props})
+    }
+  }
+
   componentDidMount() {
     this.fetchData({status: ["pending","active"], limit: 20})
     var intervalId = setInterval(function(){
@@ -67,6 +73,7 @@ class FetchData extends React.Component {
               last_bidder={auction['last_bidder']}
               start_time={auction['start_time']}
               end_time={auction['end_time']}
+              {...this.state}
             />)
           })
 

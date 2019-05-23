@@ -16,8 +16,6 @@ import 'react-toastify/dist/ReactToastify.min.css';
 
 import morpheneJS from '@boone-development/morphene-js';
 
-import { Auth, Hub } from 'aws-amplify';
-
 class AuctionCard extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -28,57 +26,16 @@ class AuctionCard extends React.Component {
 
     this.state = {
       bids: [],
-      user: false,
       error: false,
-      activeKey: false,
       intervalId: false,
       showViewBids: false,
-      authState: 'loading',
-      authData: null,
-      authError: null
     };
-
-    Hub.listen('auth', (data) => {
-      switch (data.payload.event) {
-        case 'signIn':
-          this.setState({
-            authState: 'signedIn',
-            authData: data.payload.data
-          });
-          this.checkUserAuth()
-          break;
-        case 'signIn_failure':
-          this.setState({
-            authState: 'signIn',
-            authData: null,
-            authError: data.payload.data}
-          );
-          break;
-        default:
-          break;
-      }
-    });
   }
 
-  checkUserAuth() {
-    Auth.currentAuthenticatedUser().then(user => {
-      Auth.userAttributes(user).then((attrs) => {
-        const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
-        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
-        if(activeKey && chainName) {
-          this.setState({authState: 'signedIn', user, chainName: chainName.Value, activeKey: activeKey.Value});
-        } else {
-          this.setState({authState: 'signedIn', user, chainName, activeKey});
-        }
-      })
-    }).catch(e => {
-      this.setState({authState: 'signIn', user: false, activeKey: false});
-    });
-    this.forceUpdate()
-  }
-
-  componentDidMount() {
-    this.checkUserAuth()
+  componentDidUpdate(prevProps, prevState) {
+    if(prevState.authState !== this.props.authState) {
+      this.setState({...this.props})
+    }
   }
 
   handleShowBids() {
@@ -95,19 +52,17 @@ class AuctionCard extends React.Component {
   }
 
   placeBid(permlink) {
-    Auth.currentAuthenticatedUser().then(user => {
-      Auth.userAttributes(user).then((attrs) => {
-        const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
-        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
-        if(chainName && activeKey) {
-          morpheneJS.broadcast.placeBidAsync(activeKey.Value, chainName.Value, permlink)
-            .then((result) => {toast.success("Bid successfully placed")})
-            .catch((error) => {toast.error(`${error}`)})
-        } else {
-          toast.error("Add active private key first")
-        }
-      })
-    })
+    if(this.state.authState === "signedIn") {
+      const activeKey = this.state.activeKey;
+      const chainName = this.state.chainName
+      if(chainName && activeKey) {
+        morpheneJS.broadcast.placeBidAsync(activeKey, chainName, permlink)
+          .then((result) => {toast.success("Bid successfully placed")})
+          .catch((error) => {toast.error(`${error}`)})
+      } else {
+        toast.error("Add active private key first")
+      }
+    }
   }
 
   fetchData = (params) => {
@@ -177,7 +132,7 @@ class AuctionCard extends React.Component {
           <ReactTooltip id='viewBids' type='info'>
             <span>Recent Bids</span>
           </ReactTooltip>
-          {this.state.user ? 
+          {this.state.authState === "signedIn" && this.props.status === "active" ? 
           <><Button data-tip data-for='placeBid' className="auction-button" variant="warning" onClick={() => this.placeBid(this.props.permlink)}>
             <FontAwesomeIcon icon="coins" size="2x" />
           </Button>

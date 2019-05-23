@@ -18,9 +18,6 @@ import 'react-datetime/css/react-datetime.css';
 
 import morpheneJS from '@boone-development/morphene-js';
 
-import { Auth, Hub } from 'aws-amplify';
-import { withOAuth } from 'aws-amplify-react';
-
 import '../assets/NavBar.css';
 
 class NavBar extends React.Component {
@@ -30,61 +27,17 @@ class NavBar extends React.Component {
     this.toggleShowUpdateKey = this.toggleShowUpdateKey.bind(this);
     this.toggleShowCreateAuction = this.toggleShowCreateAuction.bind(this);
     this.validateUserKey = this.validateUserKey.bind(this);
-    this.checkUserAuth = this.checkUserAuth.bind(this);
 
     this.state = {
-      user: false,
-      activeKey: false,
-      chainName: false,
       showUpdateKey: false,
-      showCreateAuction: false,
-      authState: 'loading',
-      authData: null,
-      authError: null
+      showCreateAuction: false
     };
-
-    Hub.listen('auth', (data) => {
-      switch (data.payload.event) {
-        case 'signIn':
-          this.setState({
-            authState: 'signedIn',
-            authData: data.payload.data
-          });
-          this.checkUserAuth()
-          break;
-        case 'signIn_failure':
-          this.setState({
-            authState: 'signIn',
-            authData: null,
-            authError: data.payload.data}
-          );
-          break;
-        default:
-          break;
-      }
-    });
   }
 
-  checkUserAuth() {
-    Auth.currentAuthenticatedUser().then(user => {
-      Auth.userAttributes(user).then((attrs) => {
-        const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
-        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
-
-        if(activeKey && chainName) {
-          this.setState({authState: 'signedIn', user, chainName: chainName.Value, activeKey: activeKey.Value});
-        } else {
-          this.setState({authState: 'signedIn', user, chainName, activeKey});
-        }
-      })
-    }).catch(e => {
-      this.setState({authState: 'signIn', user: false, activeKey: false});
-    });
-    this.forceUpdate()
-  }
-
-  componentDidMount() {
-    this.checkUserAuth()
+  componentDidUpdate(prevProps, prevState) {
+    if(prevState.authState !== this.props.authState) {
+      this.setState({...this.props})
+    }
   }
 
   toggleShowUpdateKey() {
@@ -97,8 +50,8 @@ class NavBar extends React.Component {
 
   updateKey() {
     const activeKey = document.getElementById("activeKey").value
-    Auth.currentAuthenticatedUser().then(user => {
-      Auth.updateUserAttributes(user, {'custom:activeKey': activeKey})
+    this.state.Auth.currentAuthenticatedUser().then(user => {
+      this.state.Auth.updateUserAttributes(user, {'custom:activeKey': activeKey})
     })
     this.setState({showUpdateKey: false})
   }
@@ -107,68 +60,58 @@ class NavBar extends React.Component {
     const fee = parseInt(document.getElementById("fee").value);
     const startTime = document.getElementById("startTime").value.replace(" ", "T");
     const endTime = document.getElementById("endTime").value.replace(" ", "T");
-    Auth.currentAuthenticatedUser().then(user => {
-      Auth.userAttributes(user).then((attrs) => {
-        const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
-        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
-        if(activeKey && chainName) {
-            morpheneJS.broadcast.createAuctionAsync(
-              activeKey.Value,
-              chainName.Value,
-              `${chainName.Value}-${moment().unix()}`,
-              startTime,
-              endTime,
-              `${fee}.000 MORPH`
-            )
-            .then((result) => {toast.success("Auction created successfully")})
-            .catch((error) => {toast.error(`Error creating auction: ${error}`)})
-        }
-      })
-    })
+
+    const { authState, activeKey, chainName } = this.state;
+
+    if(authState === "signedIn" && activeKey && chainName) {
+        morpheneJS.broadcast.createAuctionAsync(
+          activeKey,
+          chainName,
+          `${chainName}-${moment().unix()}`,
+          startTime,
+          endTime,
+          `${fee}.000 MORPH`
+        )
+        .then((result) => {toast.success("Auction created successfully")})
+        .catch((error) => {toast.error(`Error creating auction: ${error}`)})
+    }
 
     this.setState({showCreateAuction: false})
   }
 
   validateUserKey() {
-    Auth.currentAuthenticatedUser().then(user => {
-      Auth.userAttributes(user).then((attrs) => {
-        const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
-        if( chainName ) {
-          morpheneJS.api.getAccountsAsync([chainName.Value])
-              .then((result) => {
-                  if(result.length > 0) {
-                      const newKey = document.getElementById("activeKey").value;
-                      try{
-                        const pubKey = morpheneJS.auth.wifToPublic(newKey);
-                        // morpheneJS.api.getAccountsAsync([chainName.Value])
-                        // .then((result) => {
-                          var possibleKeys = []
-                          const user = result[0]
-                          user.owner.key_auths.forEach((auth) => {possibleKeys.push(auth[0])})
-                          user.active.key_auths.forEach((auth) => {possibleKeys.push(auth[0])})
-                          if(possibleKeys.includes(pubKey)){
-                              document.getElementById("invalidKey").style.display = "none"
-                              document.getElementById("validKey").style.display = "block"
-                          } else {
-                              document.getElementById("validKey").style.display = "none"
-                              document.getElementById("invalidKey").style.display = "block"
-                          }
-                        // })
-                        // .catch((error) => {console.log(error)})
-                      } catch {
-                          document.getElementById("validKey").style.display = "none"
-                          document.getElementById("invalidKey").style.display = "block"
-                      }
-                  } else {
-                      document.getElementById("activeKey").disabled = true;
-                      document.getElementById("user-submit").disabled = true;
-                      document.getElementById("activeKey").placeholder = "User not created. Please check back later";
-                  }
-            })
-            .catch((error) => console.log(error))
-          }
+    morpheneJS.api.getAccountsAsync([this.state.chainName])
+        .then((result) => {
+            if(result.length > 0) {
+                const newKey = document.getElementById("activeKey").value;
+                try{
+                  const pubKey = morpheneJS.auth.wifToPublic(newKey);
+                  // morpheneJS.api.getAccountsAsync([chainName.Value])
+                  // .then((result) => {
+                    var possibleKeys = []
+                    const user = result[0]
+                    user.owner.key_auths.forEach((auth) => {possibleKeys.push(auth[0])})
+                    user.active.key_auths.forEach((auth) => {possibleKeys.push(auth[0])})
+                    if(possibleKeys.includes(pubKey)){
+                        document.getElementById("invalidKey").style.display = "none"
+                        document.getElementById("validKey").style.display = "block"
+                    } else {
+                        document.getElementById("validKey").style.display = "none"
+                        document.getElementById("invalidKey").style.display = "block"
+                    }
+                  // })
+                  // .catch((error) => {console.log(error)})
+                } catch {
+                    document.getElementById("validKey").style.display = "none"
+                    document.getElementById("invalidKey").style.display = "block"
+                }
+            } else {
+                document.getElementById("activeKey").disabled = true;
+                document.getElementById("user-submit").disabled = true;
+                document.getElementById("activeKey").placeholder = "User not created. Please check back later";
+            }
       })
-    })
+      .catch((error) => console.log(error))
   }
 
   render() {
@@ -210,7 +153,7 @@ class NavBar extends React.Component {
             </ReactTooltip>
             <Button
               variant="warning"
-              onClick={() => Auth.signOut()}
+              onClick={() => this.state.Auth.signOut()}
               data-tip data-for="signOut"
               style={{margin: '0 10px'}}>
                 <FontAwesomeIcon icon="sign-out-alt" size="lg" />
@@ -299,4 +242,4 @@ class NavBar extends React.Component {
   }
 }
 
-export default withOAuth(NavBar);
+export default NavBar;

@@ -1,14 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
 
 import './assets/index.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
 import Home from './pages/Home';
-
-import Amplify from 'aws-amplify';
-import awsmobile from './aws-exports';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
@@ -33,13 +30,11 @@ library.add([
     faSignOutAlt
 ])
 
-Amplify.configure(awsmobile);
-
 ReactDOM.render(
-    <Router>
-        <Switch>
-            <Route path="/auctions" exact component={Home} />
-        </Switch>
-    </Router>,
+    <BrowserRouter>
+        <Route
+          path='/auctions'
+          render={(props) => <Home {...props} />} />
+    </BrowserRouter>,
     document.getElementById('root')
 );
