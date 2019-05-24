@@ -182,7 +182,11 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
     })
 }));
 
-app.use('/static', express.static("build"));
+if (process.env["NODE_ENV"] === "production") {
+    app.use('/static', express.static("build"));
+} else {
+    app.use('/', express.static("build"));
+}
 
 app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "build", "index.html"));
