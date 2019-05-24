@@ -139,30 +139,27 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         return {wif, creator, chainName, userEmail, userName}
     })
     .then((params) => {
-        const { wif, creator, chainName, userEmail, userName } = params;
-        morpheneJS.broadcast.transferAsync(wif, creator, chainName, "1000.000 MORPH", "")
-        .then((res) => {
-            var emailBody = `${userEmail} has just signed up:\n\n\n`;
-            emailBody += `CIP ID: ${userName}\n`;
-            emailBody += `ChainName: ${chainName}\n`;
-            emailBody += `Email: ${userEmail}\n`;
-            emailBody += `Funded: true\n`;
-            sendEmail(process.env["SEND_TO_EMAIL"],
-                "Morphene CIP Registration Success",
-                emailBody);
-            return;
-        })
-        .catch((error) => {
-            var emailBody = `${userEmail} has just signed up:\n\n\n`;
-            emailBody += `CIP ID: ${userName}\n`;
-            emailBody += `ChainName: ${chainName}\n`;
-            emailBody += `Email: ${userEmail}\n`;
-            emailBody += `Funded: false\n`;
-            sendEmail(process.env["SEND_TO_EMAIL"],
-                "Morphene CIP Registration Success",
-                emailBody);
-            return;
-        })
+        // this is to ensure the user has been created before sending initial deposit
+        // fixme: improve this logic to check for user and keep retrying
+        setTimeout(function(){
+            const { wif, creator, chainName, userEmail, userName } = params;
+            morpheneJS.broadcast.transfer(wif, creator, chainName, "1000.000 MORPH", ""),
+            (err, res) => {
+                var emailBody = `${userEmail} has just signed up:\n\n\n`;
+                emailBody += `CIP ID: ${userName}\n`;
+                emailBody += `ChainName: ${chainName}\n`;
+                emailBody += `Email: ${userEmail}\n`;
+                if(err) {
+                    emailBody += `Funded: false\n\n\n`;
+                    emailBody += `Error: ${error}\n`;
+                } else {
+                    emailBody += `Funded: true\n`;
+                }
+                sendEmail(process.env["SEND_TO_EMAIL"],
+                    "Morphene CIP Registration Success",
+                    emailBody);
+            }
+        }.bind(sendEmail), 3000)
     })
     .then(() => {
         httpRes.status(200).send({success: true});
