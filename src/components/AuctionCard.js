@@ -33,7 +33,7 @@ class AuctionCard extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if(prevState.authState !== this.props.authState) {
+    if(prevState.authState !== this.props.authState || prevState.activeKey !== this.props.activeKey) {
       this.setState({...this.props})
     }
   }

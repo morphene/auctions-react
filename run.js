@@ -66,8 +66,6 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         })
     })
     .then((params) => {
-        console.log("PARAMS1")
-        console.log(params)
         var userName, activeKey, chainName;
 
         const userPoolId = params.userPoolId;
@@ -102,8 +100,6 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         }
     })
     .then((params) => {
-        console.log("PARAMS2")
-        console.log(params)
         const { userPoolId, userName, userEmail, activeKey, chainName, wif, creator } = params;
         const shared_secret = process.env["SHARED_SECRET"];
         var encryptedPassword = crypto.AES.encrypt("newPassword", shared_secret).toString();
@@ -143,8 +139,6 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         return {wif, creator, chainName, userEmail, userName}
     })
     .then((params) => {
-        console.log("PARAMS3")
-        console.log(params)
         const { wif, creator, chainName, userEmail, userName } = params;
         morpheneJS.broadcast.transferAsync(wif, creator, chainName, "1000.000 MORPH", "")
         .then((res) => {

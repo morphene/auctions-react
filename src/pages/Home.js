@@ -20,34 +20,56 @@ class Home extends React.Component {
           chainName: false,
           authData: null,
           authError: null,
-          authState: 'loading'
+          authState: 'loading',
+          authIntervalId: false
         }
     }
 
+    componentWillMount() {
+      var intervalId = setInterval(function(){
+        if(!this.state.activeKey) {
+          this.storeUserInfo();
+        }
+      }.bind(this), 6000);
+      this.setState({authIntervalId: intervalId})
+    }
+
     componentDidMount() {
-        this.storeUserInfo();
-        const logger = new Logger('Cognito-Event');
-        Hub.listen('auth', (data) => {
-          switch (data.payload.event) {
-            case 'signIn':
-              logger.info('User signed in');
-              this.storeUserInfo({
-                authState: 'signedIn',
-                authData: data.payload.data
-              });
-              break;
-            case 'signIn_failure':
-              logger.error('User sign in failure. Error: ' + data.payload.data);
-              this.storeUserInfo({
-                authState: 'signIn',
-                authData: null,
-                authError: data.payload.data}
-              );
-              break;
-            default:
-              break;
-          }
-        });
+      this.storeUserInfo();
+      const logger = new Logger('Cognito-Event');
+      Hub.listen('auth', (data) => {
+        switch (data.payload.event) {
+          case 'signIn':
+            logger.info('User signed in');
+            this.storeUserInfo({
+              authState: 'signedIn',
+              authData: data.payload.data
+            });
+            break;
+          case 'signIn_failure':
+            logger.error('User sign in failure. Error: ' + data.payload.data);
+            this.storeUserInfo({
+              authState: 'signIn',
+              authData: null,
+              authError: data.payload.data}
+            );
+            break;
+          default:
+            break;
+        }
+      });
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+      if(!prevState.activeKey && this.state.activeKey){
+        clearInterval(this.state.authIntervalId);
+        this.setState({authIntervalId: false})
+      }
+    }
+
+    componentWillUnmount() {
+      clearInterval(this.state.intervalId);
+      this.setState({authIntervalId: false})
     }
 
     storeUserInfo(loginData={}) {
