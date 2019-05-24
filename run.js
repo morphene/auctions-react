@@ -182,7 +182,7 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
     })
 }));
 
-app.use('/auctions', express.static("build"));
+app.use('/static', express.static("build"));
 
 app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "build", "index.html"));
