@@ -177,7 +177,7 @@ class NavBar extends React.Component {
             style={{textAlign: 'center', fontSize: '.9em'}}
             centered>
           <Modal.Header closeButton>
-            <h5>Update Key - {this.state.chainName}</h5><hr/>
+            <h5>Update Key For - {this.state.chainName ? this.state.chainName : "Unknown User"}</h5><hr/>
           </Modal.Header>
           <Modal.Body>
             <div className="form-group form-inline">
@@ -187,7 +187,7 @@ class NavBar extends React.Component {
                 name="activeKey"
                 onChange={this.validateUserKey}
                 placeholder={"enter active key and click save"}
-                defaultValue={this.state.activeKey}
+                defaultValue={this.state.activeKey ? this.state.activeKey : undefined}
                 style={{width: "75%", marginLeft: "10px"}}
                 className="form-control"
                 autoComplete="off" />

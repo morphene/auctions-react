@@ -7,6 +7,8 @@ import Amplify, { Auth, Hub, Logger } from 'aws-amplify';
 import awsmobile from '../aws-exports';
 import { withOAuth } from 'aws-amplify-react';
 
+import axios from 'axios';
+
 Amplify.configure(awsmobile);
 
 class Home extends React.Component {
@@ -23,7 +25,7 @@ class Home extends React.Component {
     }
 
     componentDidMount() {
-        this.storeUserInfo()
+        this.storeUserInfo();
         const logger = new Logger('Cognito-Event');
         Hub.listen('auth', (data) => {
           switch (data.payload.event) {
@@ -56,12 +58,24 @@ class Home extends React.Component {
           const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
           if(activeKey && chainName){
             newState = {activeKey: activeKey.Value, chainName: chainName.Value}
+          } else {
+            try {
+              this.createChainUser(user);
+            } catch(e) { console.log(e) }
           }
           this.setState({...loginData, ...newState, authState: "signedIn"})
         })
         .catch((error) => console.log(error))
       })
       .catch((error) => console.log(error))
+    }
+
+    createChainUser(user) {
+      const data = {
+        userPoolId: user.pool.userPoolId,
+        userAccessToken: user.signInUserSession.accessToken.jwtToken
+      }
+      axios.post("https://morphene.io/createAccount", data);
     }
 
     render() {

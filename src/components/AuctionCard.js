@@ -52,10 +52,9 @@ class AuctionCard extends React.Component {
   }
 
   placeBid(permlink) {
-    if(this.state.authState === "signedIn") {
-      const activeKey = this.state.activeKey;
-      const chainName = this.state.chainName
-      if(chainName && activeKey) {
+    const { activeKey, chainName, authState } = this.state;
+    if(authState === "signedIn" && chainName) {
+      if(activeKey) {
         morpheneJS.broadcast.placeBidAsync(activeKey, chainName, permlink)
           .then((result) => {toast.success("Bid successfully placed")})
           .catch((error) => {toast.error(`${error}`)})
@@ -110,6 +109,7 @@ class AuctionCard extends React.Component {
       return dDisplay + hDisplay + mDisplay + sDisplay;
     }
 
+    const { activeKey, chainName, authState } = this.state;
     const lastBidder = this.props.last_bidder === "" ? "no bids yet" : this.props.last_bidder
     const durationSeconds = moment(this.props.end_time+'Z').diff(moment(this.props.start_time+'Z')) / 1000
 
@@ -132,7 +132,7 @@ class AuctionCard extends React.Component {
           <ReactTooltip id='viewBids' type='info'>
             <span>Recent Bids</span>
           </ReactTooltip>
-          {this.state.authState === "signedIn" && this.props.status === "active" ? 
+          {authState === "signedIn" && chainName && activeKey && this.props.status === "active" ? 
           <><Button data-tip data-for='placeBid' className="auction-button" variant="warning" onClick={() => this.placeBid(this.props.permlink)}>
             <FontAwesomeIcon icon="coins" size="2x" />
           </Button>
