@@ -144,24 +144,20 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         setTimeout(function(){
             const { wif, creator, chainName, userEmail, userName } = params;
             morpheneJS.broadcast.transfer(wif, creator, chainName, "1000.000 MORPH", ""),
-            (err, res) => {
-                var emailBody = `${userEmail} has just signed up:\n\n\n`;
-                emailBody += `CIP ID: ${userName}\n`;
-                emailBody += `ChainName: ${chainName}\n`;
-                emailBody += `Email: ${userEmail}\n`;
-                if(err) {
-                    emailBody += `Funded: false\n\n\n`;
-                    emailBody += `Error: ${error}\n`;
-                } else {
-                    emailBody += `Funded: true\n`;
-                }
-                sendEmail(process.env["SEND_TO_EMAIL"],
-                    "Morphene CIP Registration Success",
-                    emailBody);
-            }
-        }.bind(sendEmail), 3000)
+            (error, result) => { if(error) { console.log(error) } }
+        }, 3000)
+
+        return params;
     })
-    .then(() => {
+    .then((params) => {
+        const { chainName, userEmail, userName } = params;
+        var emailBody = `${userEmail} has just signed up:\n\n\n`;
+        emailBody += `CIP ID: ${userName}\n`;
+        emailBody += `ChainName: ${chainName}\n`;
+        emailBody += `Email: ${userEmail}\n`;
+        sendEmail(process.env["SEND_TO_EMAIL"],
+            "Morphene CIP Registration Success",
+            emailBody);
         httpRes.status(200).send({success: true});
         return;
     })
