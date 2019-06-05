@@ -59,62 +59,39 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         const cognitoIdServiceProvider = new aws.CognitoIdentityServiceProvider({region: 'us-east-1'});
         cognitoIdServiceProvider.getUser({AccessToken: userAccessToken}, (error, data) => {
             if (error) {
-                throw new Error(JSON.stringify(error));
+                reject(new Error(JSON.stringify(error)));
             } else {
-                resolve({userPoolId, userAccessToken, user: data});
+                var chainName = data.UserAttributes.find((obj)=>{return obj.Name === "custom:chainName"});
+                morpheneJS.api.getAccountsAsync([chainName.Value])
+                .then((res) => {
+                    resolve({userPoolId, userAccessToken, user: data, accountExists: res.length > 0});
+                })
             }
         })
     })
     .then((params) => {
-        var userName, activeKey, chainName, newPassword, keys, wif, creator, fee, owner, active, posting, memoKey;
+        var userName, activeKey, chainName;
 
         const userPoolId = params.userPoolId;
         userName = params.user.Username;
         const userEmail = params.user.UserAttributes.find((obj)=>{return obj.Name === "email"}).Value;
-        activeKey = params.user.UserAttributes.find((obj)=>{return obj.Name === "custom:activeKey"});
-        chainName = params.user.UserAttributes.find((obj)=>{return obj.Name === "custom:chainName"});
 
-        if(activeKey && chainName) {
-            morpheneJS.api.getAccounts([chainName.Value], function(err,result){
-              if(result.length === 0 && !error) {
-                chainName = `m${morpheneJS.formatter.createSuggestedPassword()}`.slice(0,16).toLowerCase();
-                newPassword = morpheneJS.formatter.createSuggestedPassword();
-                keys = morpheneJS.auth.generateKeys(chainName, newPassword, ["owner","active","posting","memo"]);
-                activeKey = morpheneJS.auth.getPrivateKeys(chainName, newPassword, ["active"]).active;
-
-                wif = process.env["MORPHENE_CREATOR_WIF"];
-                creator = process.env["MORPHENE_CREATOR_NAME"];
-
-                fee = process.env["MORPHENE_CREATOR_FEE"];
-                owner = {"key_auths":[[keys.owner, 1]],"account_auths":[],"weight_threshold":1};
-                active = {"key_auths":[[keys.active, 1]],"account_auths":[],"weight_threshold":1};
-                posting = {"key_auths":[[keys.posting, 1]],"account_auths":[],"weight_threshold":1};
-                memoKey = keys.memo;
-
-                morpheneJS.broadcast.accountCreate(wif, fee, creator, chainName, owner, active, posting, memoKey, '{}',
-                (err, result) => {
-                    if (err) { throw new Error(JSON.stringify(err)); }
-                })
-
-                return {userPoolId, userName, userEmail, activeKey, chainName, wif, creator};
-              } else {
-                if (error) { throw new Error(JSON.stringify(err)); } else { throw null; }
-              }
-            })
+        if(params.accountExists){
+            throw null;
         } else {
-            chainName = `m${morpheneJS.formatter.createSuggestedPassword()}`.slice(0,16).toLowerCase();
-            newPassword = morpheneJS.formatter.createSuggestedPassword();
-            keys = morpheneJS.auth.generateKeys(chainName, newPassword, ["owner","active","posting","memo"]);
+            const chainName = `m${morpheneJS.formatter.createSuggestedPassword()}`.slice(0,16).toLowerCase();
+            const newPassword = morpheneJS.formatter.createSuggestedPassword();
+            const keys = morpheneJS.auth.generateKeys(chainName, newPassword, ["owner","active","posting","memo"]);
             activeKey = morpheneJS.auth.getPrivateKeys(chainName, newPassword, ["active"]).active;
 
-            wif = process.env["MORPHENE_CREATOR_WIF"];
-            creator = process.env["MORPHENE_CREATOR_NAME"];
+            const wif = process.env["MORPHENE_CREATOR_WIF"];
+            const creator = process.env["MORPHENE_CREATOR_NAME"];
 
-            fee = process.env["MORPHENE_CREATOR_FEE"];
-            owner = {"key_auths":[[keys.owner, 1]],"account_auths":[],"weight_threshold":1};
-            active = {"key_auths":[[keys.active, 1]],"account_auths":[],"weight_threshold":1};
-            posting = {"key_auths":[[keys.posting, 1]],"account_auths":[],"weight_threshold":1};
-            memoKey = keys.memo;
+            const fee = process.env["MORPHENE_CREATOR_FEE"];
+            const owner = {"key_auths":[[keys.owner, 1]],"account_auths":[],"weight_threshold":1};
+            const active = {"key_auths":[[keys.active, 1]],"account_auths":[],"weight_threshold":1};
+            const posting = {"key_auths":[[keys.posting, 1]],"account_auths":[],"weight_threshold":1};
+            const memoKey = keys.memo;
 
             morpheneJS.broadcast.accountCreate(wif, fee, creator, chainName, owner, active, posting, memoKey, '{}',
             (err, result) => {
@@ -187,17 +164,19 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         return;
     })
     .catch((error) => {
-        if (error) {
+        if(error){
             var emailBody = `Error while creating chain account subscriber.\n\n\n\n`;
             emailBody += `${error}`;
             sendEmail(process.env["SEND_TO_EMAIL"], "Morphene CIP Registration Failure", emailBody);
             httpRes.status(500).send(error);
+        } else {
+            httpRes.status(200).send({});
         }
     })
 }));
 
 if (process.env["NODE_ENV"] === "production") {
-    app.use('/auctions', express.static("build"));
+    app.use('/static', express.static("build"));
 } else {
     app.use('/', express.static("build"));
 }
