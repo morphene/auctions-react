@@ -66,7 +66,7 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         })
     })
     .then((params) => {
-        var userName, activeKey, chainName;
+        var userName, activeKey, chainName, newPassword, keys, wif, creator, fee, owner, active, posting, memoKey;
 
         const userPoolId = params.userPoolId;
         userName = params.user.Username;
@@ -75,21 +75,47 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         chainName = params.user.UserAttributes.find((obj)=>{return obj.Name === "custom:chainName"});
 
         if(activeKey && chainName) {
-            throw new Error(`User: ${userEmail} already has a chain account (${chainName.Value}).`);
+            morpheneJS.api.getAccountsAsync([chainName.Value])
+            .then((result) => {
+              if(result.length === 0) {
+                chainName = `m${morpheneJS.formatter.createSuggestedPassword()}`.slice(0,16).toLowerCase();
+                newPassword = morpheneJS.formatter.createSuggestedPassword();
+                keys = morpheneJS.auth.generateKeys(chainName, newPassword, ["owner","active","posting","memo"]);
+                activeKey = morpheneJS.auth.getPrivateKeys(chainName, newPassword, ["active"]).active;
+
+                wif = process.env["MORPHENE_CREATOR_WIF"];
+                creator = process.env["MORPHENE_CREATOR_NAME"];
+
+                fee = process.env["MORPHENE_CREATOR_FEE"];
+                owner = {"key_auths":[[keys.owner, 1]],"account_auths":[],"weight_threshold":1};
+                active = {"key_auths":[[keys.active, 1]],"account_auths":[],"weight_threshold":1};
+                posting = {"key_auths":[[keys.posting, 1]],"account_auths":[],"weight_threshold":1};
+                memoKey = keys.memo;
+
+                morpheneJS.broadcast.accountCreate(wif, fee, creator, chainName, owner, active, posting, memoKey, '{}',
+                (err, result) => {
+                    if (err) { throw new Error(JSON.stringify(err)); }
+                })
+
+                return {userPoolId, userName, userEmail, activeKey, chainName, wif, creator};
+              } else {
+                throw new Error(`User: ${userEmail} already has a chain account (${chainName.Value}).`);
+              }
+            })
         } else {
             chainName = `m${morpheneJS.formatter.createSuggestedPassword()}`.slice(0,16).toLowerCase();
-            const newPassword = morpheneJS.formatter.createSuggestedPassword();
-            const keys = morpheneJS.auth.generateKeys(chainName, newPassword, ["owner","active","posting","memo"]);
+            newPassword = morpheneJS.formatter.createSuggestedPassword();
+            keys = morpheneJS.auth.generateKeys(chainName, newPassword, ["owner","active","posting","memo"]);
             activeKey = morpheneJS.auth.getPrivateKeys(chainName, newPassword, ["active"]).active;
 
-            const wif = process.env["MORPHENE_CREATOR_WIF"];
-            const creator = process.env["MORPHENE_CREATOR_NAME"];
+            wif = process.env["MORPHENE_CREATOR_WIF"];
+            creator = process.env["MORPHENE_CREATOR_NAME"];
 
-            const fee = process.env["MORPHENE_CREATOR_FEE"];
-            const owner = {"key_auths":[[keys.owner, 1]],"account_auths":[],"weight_threshold":1};
-            const active = {"key_auths":[[keys.active, 1]],"account_auths":[],"weight_threshold":1};
-            const posting = {"key_auths":[[keys.posting, 1]],"account_auths":[],"weight_threshold":1};
-            const memoKey = keys.memo;
+            fee = process.env["MORPHENE_CREATOR_FEE"];
+            owner = {"key_auths":[[keys.owner, 1]],"account_auths":[],"weight_threshold":1};
+            active = {"key_auths":[[keys.active, 1]],"account_auths":[],"weight_threshold":1};
+            posting = {"key_auths":[[keys.posting, 1]],"account_auths":[],"weight_threshold":1};
+            memoKey = keys.memo;
 
             morpheneJS.broadcast.accountCreate(wif, fee, creator, chainName, owner, active, posting, memoKey, '{}',
             (err, result) => {
@@ -170,7 +196,7 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
 }));
 
 if (process.env["NODE_ENV"] === "production") {
-    app.use('/static', express.static("build"));
+    app.use('/auctions', express.static("build"));
 } else {
     app.use('/', express.static("build"));
 }

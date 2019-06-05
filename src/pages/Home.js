@@ -9,6 +9,8 @@ import { withOAuth } from 'aws-amplify-react';
 
 import axios from 'axios';
 
+import morpheneJS from '@boone-development/morphene-js';
+
 Amplify.configure(awsmobile);
 
 class Home extends React.Component {
@@ -79,6 +81,15 @@ class Home extends React.Component {
           const activeKey = attrs.find((obj)=>{return obj.Name === "custom:activeKey"});
           const chainName = attrs.find((obj)=>{return obj.Name === "custom:chainName"});
           if(activeKey && chainName){
+            morpheneJS.api.getAccountsAsync([chainName.Value])
+            .then((result) => {
+              if(result.length === 0) {
+                this.createChainUser(user);
+              }
+            })
+            .catch((error) => {
+              console.log(error)
+            })
             newState = {activeKey: activeKey.Value, chainName: chainName.Value}
           } else {
             try {
