@@ -99,7 +99,7 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
 
                 return {userPoolId, userName, userEmail, activeKey, chainName, wif, creator};
               } else {
-                throw new Error(`User: ${userEmail} already has a chain account (${chainName.Value}).`);
+                throw null;
               }
             })
         } else {
@@ -188,10 +188,12 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         return;
     })
     .catch((error) => {
-        var emailBody = `Error while creating chain account subscriber.\n\n\n\n`;
-        emailBody += `${error}`;
-        sendEmail(process.env["SEND_TO_EMAIL"], "Morphene CIP Registration Failure", emailBody);
-        httpRes.status(500).send(error);
+        if (error) {
+            var emailBody = `Error while creating chain account subscriber.\n\n\n\n`;
+            emailBody += `${error}`;
+            sendEmail(process.env["SEND_TO_EMAIL"], "Morphene CIP Registration Failure", emailBody);
+            httpRes.status(500).send(error);
+        }
     })
 }));
 
