@@ -75,9 +75,8 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
         chainName = params.user.UserAttributes.find((obj)=>{return obj.Name === "custom:chainName"});
 
         if(activeKey && chainName) {
-            morpheneJS.api.getAccountsAsync([chainName.Value])
-            .then((result) => {
-              if(result.length === 0) {
+            morpheneJS.api.getAccounts([chainName.Value], function(err,result){
+              if(result.length === 0 && !error) {
                 chainName = `m${morpheneJS.formatter.createSuggestedPassword()}`.slice(0,16).toLowerCase();
                 newPassword = morpheneJS.formatter.createSuggestedPassword();
                 keys = morpheneJS.auth.generateKeys(chainName, newPassword, ["owner","active","posting","memo"]);
@@ -99,7 +98,7 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
 
                 return {userPoolId, userName, userEmail, activeKey, chainName, wif, creator};
               } else {
-                throw null;
+                if (error) { throw new Error(JSON.stringify(err)); } else { throw null; }
               }
             })
         } else {
