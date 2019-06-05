@@ -62,10 +62,17 @@ app.post('/createAccount', asyncHandler(async (httpReq, httpRes, httpNext) => {
                 reject(new Error(JSON.stringify(error)));
             } else {
                 var chainName = data.UserAttributes.find((obj)=>{return obj.Name === "custom:chainName"});
-                morpheneJS.api.getAccountsAsync([chainName.Value])
-                .then((res) => {
-                    resolve({userPoolId, userAccessToken, user: data, accountExists: res.length > 0});
-                })
+                if(chainName){
+                    morpheneJS.api.getAccountsAsync([chainName.Value])
+                    .then((res) => {
+                        resolve({userPoolId, userAccessToken, user: data, accountExists: res.length > 0});
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    })
+                } else {
+                    resolve({userPoolId, userAccessToken, user: data, accountExists: false});
+                }
             }
         })
     })
