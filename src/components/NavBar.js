@@ -188,6 +188,7 @@ class NavBar extends React.Component {
                 onChange={this.validateUserKey}
                 placeholder={"enter active key and click save"}
                 defaultValue={this.state.activeKey ? this.state.activeKey : undefined}
+                disabled={true}
                 style={{width: "75%", marginLeft: "10px"}}
                 className="form-control"
                 autoComplete="off" />
