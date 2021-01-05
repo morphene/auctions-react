@@ -11,7 +11,7 @@
     "aws-amplify": "^1.1.28",
     "aws-amplify-react": "^2.3.8",
     "aws-sdk": "^2.462.0",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.3.1",
     "bs58": "^4.0.1",
