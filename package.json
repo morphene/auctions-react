@@ -10,7 +10,7 @@
     "@fortawesome/react-fontawesome": "^0.1.4",
     "aws-amplify": "^1.1.28",
     "aws-amplify-react": "^2.3.8",
-    "aws-sdk": "^2.462.0",
+    "aws-sdk": "^2.814.0",
     "axios": "^0.18.0",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.3.1",
